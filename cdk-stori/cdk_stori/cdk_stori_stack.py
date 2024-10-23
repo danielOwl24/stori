@@ -21,20 +21,20 @@ class TumbnailGeneratorStack(Stack):
         """
         Initializes the Thumbnail Generator stack with the necessary AWS resources.
 
-        Parameters:
-        - scope (Construct): Scope in which this stack is defined.
-        - construct_id (str): Identifier for this construct.
-        - kwargs (dict): Additional keyword arguments.
+        Args:
+            scope (Construct): Scope in which this stack is defined.
+            construct_id (str): Identifier for this construct.
+            kwargs (dict): Additional keyword arguments.
 
         Returns:
-        None
+            None
         """
         super().__init__(scope, construct_id, **kwargs)
         self.construct_id = construct_id
 
         # Main methods
         self.create_source_s3_bucket()
-        self.create_target_s3_bucket()
+        self.create_destination_s3_bucket()
         self.create_s3_event()
         self.create_dynamo_db_table()
         self.create_lambda_function()
@@ -47,7 +47,7 @@ class TumbnailGeneratorStack(Stack):
         The Lambda function uses Python 3.8 runtime and has a 15-second timeout with 128 MB memory.
 
         Returns:
-        None
+            None
         """
         # Create IAM Role
         self.lambda_role = iam.Role(
@@ -62,6 +62,10 @@ class TumbnailGeneratorStack(Stack):
             resources=[self.source_bucket.bucket_arn, f"{self.source_bucket.bucket_arn}/*"]
         ))
 
+        self.lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["s3:GetObject", "s3:ListBucket", "s3:PutObject"],
+            resources=[self.destination_bucket.bucket_arn, f"{self.source_bucket.bucket_arn}/*"]
+        ))
         # Add DynamoDB permissions
         self.lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:Scan", "dynamodb:Query"],
@@ -92,7 +96,7 @@ class TumbnailGeneratorStack(Stack):
         and requires SSL for communication.
 
         Returns:
-        None
+            None
         """
         self.source_bucket = s3.Bucket(
                                     self,
@@ -102,7 +106,7 @@ class TumbnailGeneratorStack(Stack):
                                     enforce_sSL=True,
                                     versioned=True)
 
-    def create_target_s3_bucket(self):
+    def create_destination_s3_bucket(self):
         """
         Creates an S3 bucket to store the generated thumbnail images.
 
@@ -110,11 +114,11 @@ class TumbnailGeneratorStack(Stack):
         and uses S3 managed encryption with SSL enforcement.
 
         Returns:
-        None
+            None
         """
-        self.target_bucket = s3.Bucket(
+        self.destination_bucket = s3.Bucket(
                                     self, 
-                                    bucket_name="thumbnails-generator-target-images-bucket",
+                                    bucket_name="thumbnails-generator-destination-images-bucket",
                                     block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
                                     encryption=s3.BucketEncryption.S3_MANAGED,
                                     enforce_sSL=True,
@@ -126,7 +130,7 @@ class TumbnailGeneratorStack(Stack):
         (image) is uploaded to the source S3 bucket.
 
         Returns:
-        None
+            None
         """
         self.notification = aws_s3_notifications.LambdaDestination(self.fn)
         self.source_bucket.add_event_notification(s3.EventType.OBJECT_CREATED, self.notification)
@@ -138,7 +142,7 @@ class TumbnailGeneratorStack(Stack):
         The table uses a string partition key named 'id'.
 
         Returns:
-        None
+            None
         """
         self.metadata_table = dynamodb.Table(self, "thumbails-generator-metadata",
             partition_key=dynamodb.Attribute(name="id", type=dynamodb.AttributeType.STRING))
