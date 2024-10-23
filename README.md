@@ -43,8 +43,16 @@ Sigue estos pasos para desplegar el servicio:
     ```source environment_name/bin/activate```
 7. Instala las dependecias del proyecto.
     ```pip install -r requirements.txt```
-8. Configura las credenciales de AWS.
+8. Configura las credenciales de AWS. Es necesario tener instalado AWS CLI.
     ```aws config```
 9. Configura las variables de entorno como la cuenta de AWS, la región, etc; las cuales son necesarias para la ejecución de la aplicación. La forma de crear estas variables de entorno depende del sistema operativo.
-
+10. Ejecutar el comando bootstrap para desplegar la aplicación por primera vez y arrancar el proyecto con las configuraciones de AWS ingresadas anteriormente.
+    ```cdk bootstrap```
+11. Lista los stacks del CDK actual.
+    ```cdk list```
+12. Ejecuta el siguiente comando para que CloudFormation lleve a cabo una validación previa del código del stack antes del despliegue.
+    ```cdk synth```
+13. Desplegar la infraestructura configurada en la aplicación de CDK por medio de CloudFormation en la cuenta de AWS.
+   ```cdk deploy```
+14. Validar que los servicios se hayan desplegado correctamente en AWS.
 

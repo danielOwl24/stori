@@ -5,12 +5,13 @@ import aws_cdk as cdk
 
 from cdk_stori.cdk_stori_stack import CdkStoriStack
 
-
+account = os.getenv('AWS_ACCOUNT')
+region = os.getenv('AWS_REGION')
 app = cdk.App()
 CdkStoriStack(
     app,
     "CdkStoriStack",
-    env = cdk.Environment(account='123456789012', region='us-east-1'),
+    env = cdk.Environment(account=account, region=region),
     )
 
 app.synth()
