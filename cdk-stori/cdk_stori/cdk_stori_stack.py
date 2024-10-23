@@ -4,7 +4,8 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_dynamodb as dynamodb,
     aws_s3_notifications,
-    Duration
+    Duration,
+    aws_iam as iam
 )
 
 from constructs import Construct
@@ -32,21 +33,46 @@ class TumbnailGeneratorStack(Stack):
         self.construct_id = construct_id
 
         # Main methods
-        self.create_lambda_function()
         self.create_source_s3_bucket()
         self.create_target_s3_bucket()
         self.create_s3_event()
         self.create_dynamo_db_table()
+        self.create_lambda_function()
 
     def create_lambda_function(self):
         """
         Creates an AWS Lambda function that will generate thumbnails from source images.
+        A role to access to the different resources required for this project is created too.
 
         The Lambda function uses Python 3.8 runtime and has a 15-second timeout with 128 MB memory.
 
         Returns:
         None
         """
+        # Create IAM Role
+        self.lambda_role = iam.Role(
+            self, "LambdaExecutionRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"), 
+            description="Role that allows Lambda to access S3, DynamoDB and Lambda services",
+        )
+
+        # Add S3 permissions
+        self.lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["s3:GetObject", "s3:ListBucket"],
+            resources=[self.source_bucket.bucket_arn, f"{self.source_bucket.bucket_arn}/*"]
+        ))
+
+        # Add DynamoDB permissions
+        self.lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:Scan", "dynamodb:Query"],
+            resources=[self.metadata_table.table_arn]
+        ))
+
+        # Add Lambda permissions
+        self.lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["lambda:InvokeFunction"],
+            resources=["*"] 
+        ))
         self.fn = _lambda.Function(
                             self,
                             function_name="thumbnails-generator",
@@ -55,7 +81,8 @@ class TumbnailGeneratorStack(Stack):
                             handler="lambda_function.lambda_handler",
                             code=_lambda.Code.from_asset("./lambda"),
                             timeout=Duration.seconds(15),
-                            memory_size=128)
+                            memory_size=128,
+                            role = self.lambda_role)
 
     def create_source_s3_bucket(self):
         """
