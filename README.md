@@ -27,13 +27,24 @@ El sistema se basa en una arquitectura **serverless** basada en eventos utilizan
 Sigue estos pasos para desplegar el servicio:
 
 1.	Clona el repositorio:
-    '''git clone https://github.com/danielOwl24/stori.git'''
+    ```git clone https://github.com/danielOwl24/stori.git```
+    ```cd stori```
 2. Instalar Node.js
 3. Verificar instalación de Node.js
-    node -v
-    npm -v
+    ```node -v```
+    ```npm -v```
 3. Instalar AWS CDK
-    npm install -g aws-cdk
+    ```npm install -g aws-cdk```
 4. Verificar instalación de AWS CDK
-    cdk --version
+    ```cdk --version```
+5. Crea un entorno virtual para instalar las dependencias, esto puede variar de un sistema operativo a otro, para este caso se desarrolló en macOS.
+   ```python3 -m venv $environment_name$```
+6. Activa el entorno virtual.
+    ```source environment_name/bin/activate```
+7. Instala las dependecias del proyecto.
+    ```pip install -r requirements.txt```
+8. Configura las credenciales de AWS.
+    ```aws config```
+9. Configura las variables de entorno como la cuenta de AWS, la región, etc; las cuales son necesarias para la ejecución de la aplicación. La forma de crear estas variables de entorno depende del sistema operativo.
+
 
