@@ -13,7 +13,7 @@ Este proyecto consiste en el diseño de una arquitectura de datos para un genera
 El sistema se basa en una arquitectura **serverless** basada en eventos utilizando los siguientes componentes:
 
 - **Amazon S3**: Para recibir y almacenar imágenes grandes y miniaturas.
-- **Lambda Functions**: Para procesar las imágenes y generar las miniaturas de manera automática cuando se suben imágenes nuevas por medio de un evento de S3.
+- **Lambda Functions**: Para procesar las imágenes y generar las miniaturas de manera automática cuando se suben imágenes nuevas por medio de un evento de S3. Se agregó esta función a una VPC y una subnet sin acceso a internet por lo que para acceder a los buckets de S3 y la tabla de DynamoDB es necesario configurar un VPC endpoint.
 - **Infraestructura como código (IaC)**: El despliegue se realiza utilizando CDK para garantizar la consistencia y escalabilidad del sistema.
 
 <p align="center">
@@ -22,9 +22,9 @@ El sistema se basa en una arquitectura **serverless** basada en eventos utilizan
 
 ## Herramientas y Tecnologías
 ***
--**Python**: Para escribir el código del generador de miniaturas.
--**Pillow**: Librería de Python utilizada para procesar imágenes.
--**Amazon Web Services (AWS)**: Servicios utilizados incluyen S3, Lambda y CDK para el despliegue. 
+- **Python**: Para escribir el código del generador de miniaturas.
+- **Pillow**: Librería de Python utilizada para procesar imágenes.
+- **Amazon Web Services (AWS)**: Servicios utilizados incluyen S3, Lambda y CDK para el despliegue. 
 
 ## Instalación y Despliegue
 
@@ -59,4 +59,33 @@ Sigue estos pasos para desplegar el servicio:
 13. Desplegar la infraestructura configurada en la aplicación de CDK por medio de CloudFormation en la cuenta de AWS.
    ```cdk deploy```
 14. Validar que los servicios se hayan desplegado correctamente en AWS.
+
+## Explicación del Proyecto
+
+Este proyecto utiliza una arquitectura basada en eventos y disponible para ser desplegada en una cuenta de AWS, donde cada vez que una imagen es subida al bucket S3 de origen, un evento de S3 activa una función Lambda que genera la miniatura correspondiente y la guarda en un bucket de destino.
+
+### Supuestos
+
+- Esta infraestructura se adecua a un volumen de usuarios de miles a un millón, debido al servicio de cómputo utilizado pueden ser demasiadas solicitudes para la arquitectura.
+- Si es necesario almacenar credenciales o contraseñas hacia otros servicios se almacenarán en el servicio de secretos de AWS.
+- La configuración básica de cyberseguridad y redes ya se encuentra desplegada ya que no es el foco de este proyecto.
+
+### Ventajas
+
+- **Escalabilidad**: La arquitectura serverless permite escalar el procesamiento según el volumen de imágenes y los requerimientos de los usuarios..
+- **Costos optimizados**: Se paga solo por el uso de las funciones Lambda y almacenamiento en S3.
+- **Simplicidad**: El uso de servicios administrados por AWS reduce la complejidad operativa ya que no hay que hacer configuraciones ni actualizaciones.
+
+### Desventajas
+
+- **Límite de tiempo de ejecución de Lambda**: Procesar imágenes muy grandes podría requerir ajustar los tiempos de ejecución de Lambda.
+- **Dependencia de servicios de AWS**: Esta solución está diseñada y desarrollada para  AWS, lo que puede ser una limitación en entornos multi-cloud.
+
+### Puntos de mejora
+
+- Usar la clase de almacenamiento adecuada para los buckets de S3 según las necesidades de la aplicación, por ahora se está usando el simple storage pero dependiendo de la fecuencia de acceso a las imágenes podrían moverse a una capa Intelligent Tiering o Standard-IA.
+-  Si se requiere mayor tiempo o capacidad de procesamiento sería adecuado implementar la solución en un servicio como una instancia de EC2 o un job de Glue que permita mayor cantidad de tiempo de procesamiento.
+- Tener en cuenta siempre las recomendaciones de seguridad de AWS, la distribución de roles y permisos hacia los diferentes servicios y conservar siempre el principio de menor privilegio.
+- Agregar variables de entorno a la función lambda para simplificar el código y hacerlo más entendible y organizado.
+
 
