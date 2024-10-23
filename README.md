@@ -16,7 +16,7 @@ El sistema se basa en una arquitectura **serverless** basada en eventos utilizan
 - **Lambda Functions**: Para procesar las imágenes y generar las miniaturas de manera automática cuando se suben imágenes nuevas por medio de un evento de S3.
 -**Infraestructura como código (IaC)**: El despliegue se realiza utilizando CDK para garantizar la consistencia y escalabilidad del sistema.
 
-![Arquitectura propuesta para la solución](images/arquitectura_thumbnails.png)
+![Arquitectura propuesta para la solución](images/arquitectura_thumbnails.drawio.png)
 
 ## Herramientas y Tecnologías
 ***
