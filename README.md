@@ -83,9 +83,11 @@ Este proyecto utiliza una arquitectura basada en eventos y disponible para ser d
 
 ### Puntos de mejora
 
-- Usar la clase de almacenamiento adecuada para los buckets de S3 según las necesidades de la aplicación, por ahora se está usando el simple storage pero dependiendo de la fecuencia de acceso a las imágenes podrían moverse a una capa Intelligent Tiering o Standard-IA.
+- Usar la clase de almacenamiento adecuada para los buckets de S3 según las necesidades de la aplicación, por ahora se está usando el simple storage pero dependiendo de la fecuencia de acceso a las imágenes podrían moverse a una capa Intelligent Tiering o Standard-IA. Esto permitiría reducir costos en el almacenamiento.
 -  Si se requiere mayor tiempo o capacidad de procesamiento sería adecuado implementar la solución en un servicio como una instancia de EC2 o un job de Glue que permita mayor cantidad de tiempo de procesamiento.
 - Tener en cuenta siempre las recomendaciones de seguridad de AWS, la distribución de roles y permisos hacia los diferentes servicios y conservar siempre el principio de menor privilegio.
 - Agregar variables de entorno a la función lambda para simplificar el código y hacerlo más entendible y organizado.
+- Implementar el uso de tags para monitorear el uso y consumo de recursos.
+- Implementar un sistema de monitoreo de las operaciones que se llevan a cabo por medio de eventos de CloudWatch y notificaciones SNS por correo electrónico cuando algo sale mal.
 
 
