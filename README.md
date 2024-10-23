@@ -12,6 +12,28 @@ Este proyecto consiste en el diseño de una arquitectura de datos para un genera
 ***
 El sistema se basa en una arquitectura serverless basada en eventos utilizando los siguientes componentes:
 
-	•	Amazon S3: Para recibir y almacenar imágenes grandes y miniaturas.
-	•	Lambda Functions: Para procesar las imágenes y generar las miniaturas de manera automática cuando se suben imágenes nuevas por medio de un evento de S3.
-	•	Infraestructura como código (IaC): El despliegue se realiza utilizando CDK para garantizar la consistencia y escalabilidad del sistema.
+•	Amazon S3: Para recibir y almacenar imágenes grandes y miniaturas.
+•	Lambda Functions: Para procesar las imágenes y generar las miniaturas de manera automática cuando se suben imágenes nuevas por medio de un evento de S3.
+•	Infraestructura como código (IaC): El despliegue se realiza utilizando CDK para garantizar la consistencia y escalabilidad del sistema.
+
+## Herramientas y Tecnologías
+***
+•	Python: Para escribir el código del generador de miniaturas.
+•	Pillow: Librería de Python utilizada para procesar imágenes.
+•	Amazon Web Services (AWS): Servicios utilizados incluyen S3, Lambda y CDK para el despliegue. 
+
+## Instalación y Despliegue
+
+Sigue estos pasos para desplegar el servicio:
+
+1.	Clona el repositorio:
+    git clone https://github.com/danielOwl24/stori.git
+2. Instalar Node.js
+3. Verificar instalación de Node.js
+    node -v
+    npm -v
+3. Instalar AWS CDK
+    npm install -g aws-cdk
+4. Verificar instalación de AWS CDK
+    cdk --version
+
