@@ -17,7 +17,7 @@ El sistema se basa en una arquitectura **serverless** basada en eventos utilizan
 -**Infraestructura como código (IaC)**: El despliegue se realiza utilizando CDK para garantizar la consistencia y escalabilidad del sistema.
 
 <p align="center">
-  <img src="images/arquitectura_thumbnails.drawio.png" alt="Arquitectura propuesta para la solución" width="300"/>
+  <img src="images/arquitectura_thumbnails.drawio.png" alt="Arquitectura propuesta para la solución" width="400"/>
 </p>
 
 ## Herramientas y Tecnologías
