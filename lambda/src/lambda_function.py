@@ -47,7 +47,7 @@ def save_thumbnail_metadata(metadata, thumbnail_key):
     Saves the metadata of a thumbnail in a DynamoDB table.
 
     Args:
-        metadata (dict): A dictionary containing the metadata associated with the thumbnail. It must include the necessary attributes for the DynamoDB table.
+        metadata (dict): A dictionary containing the metadata associated with the thumbnail.
         thumbnail_key (str): The identifier or name of the thumbnail, used to log which thumbnail is being processed.
     """
     try:
