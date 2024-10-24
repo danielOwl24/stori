@@ -145,4 +145,10 @@ class TumbnailGeneratorStack(Stack):
             None
         """
         self.metadata_table = dynamodb.Table(self, "thumbails-generator-metadata",
-            partition_key=dynamodb.Attribute(name="id", type=dynamodb.AttributeType.STRING))
+            partition_key=dynamodb.Attribute(
+                name="Id",
+                type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(
+                name="CreatedAt", 
+                type=dynamodb.AttributeType.STRING)
+        )

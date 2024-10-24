@@ -3,10 +3,12 @@ import boto3
 from PIL import Image
 from io import BytesIO
 import os
+from PIL.ExifTags import TAGS
+import datetime
 
 s3 = boto3.client('s3')
+dynamodb = boto3.resource('dynamodb')
 THUMBNAIL_SIZE = (64, 64)
-
 def generate_thumbnail(s3_object_content, thumbnail_key):
     """
     Generates a thumbnail from an image using the Pillow library.
@@ -25,10 +27,36 @@ def generate_thumbnail(s3_object_content, thumbnail_key):
     try:
         with Image.open(BytesIO(s3_object_content)) as image:
             image.thumbnail(THUMBNAIL_SIZE)
-        return image
+            exif_data = image._getexif()
+            metadata = {}
+            metadata['Id'] = thumbnail_key
+            metadata['Size'] = image.size
+            metadata['CreatedAt'] = datetime.utcnow().isoformat()
+            metadata['Format'] = image.format
+            metadata['Mode'] = image.mode
+            if exif_data is not None:
+                for tag_id, value in exif_data.items():
+                    tag_name = TAGS.get(tag_id, tag_id)
+                    metadata['Exif'][tag_name] = value
+            return image, metadata
     except OSError:
         print(f"It was not possible to create thumbnail for {thumbnail_key}.")
 
+def save_thumbnail_metadata(metadata, thumbnail_key):
+    """
+    Saves the metadata of a thumbnail in a DynamoDB table.
+
+    Args:
+        metadata (dict): A dictionary containing the metadata associated with the thumbnail. It must include the necessary attributes for the DynamoDB table.
+        thumbnail_key (str): The identifier or name of the thumbnail, used to log which thumbnail is being processed.
+    """
+    try:
+        table = dynamodb.Table('thumbails-generator-metadata')
+        table.put_item(Item=metadata)
+        print(f"Metadata of the thumbnail {thumbnail_key} was stored in DynamoDB.")
+    except Exception as e:
+        print(f"An unexpected error occurred while saving metadata for thumbnail {thumbnail_key}: {str(e)}")
+        raise
 def lambda_handler(event, context):
     """
     Main AWS Lambda function that processes S3 events to generate thumbnails.
@@ -59,11 +87,14 @@ def lambda_handler(event, context):
         s3_object_content = s3_object.get("Body").read()
         
         # Generate the thumbnail
-        thumbnail = generate_thumbnail(s3_object_content, thumbnail_key)
+        thumbnail, metadata_dict= generate_thumbnail(s3_object_content, thumbnail_key)
         
         # Create the filename to store the thumbnail, it will have the same key of the original image
         thumbnail_key = f"thumbnails/{key.split('/')[-1]}"
         
+        # Save metadata thumbnail within a DynamoDB table
+        save_thumbnail_metadata(metadata_dict, thumbnail_key)
+
         # Save the thumbnail into the destination bucket
         s3.put_object(
             Bucket=destination_bucket,
@@ -81,5 +112,5 @@ def lambda_handler(event, context):
         print(e)
         return {
             'statusCode': 500,
-            'body': json.dumps('Error generating thumbnail')
+            'body': json.dumps(f'Error generating thumbnail {thumbnail_key}')
         }
